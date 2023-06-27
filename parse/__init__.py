@@ -24,7 +24,7 @@ except:
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     data = req.params.get('data')
-    if not question:
+    if not data:
         try:
             req_body = req.get_json()
             data = req_body.get('data')
