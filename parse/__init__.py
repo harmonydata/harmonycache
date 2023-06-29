@@ -20,17 +20,17 @@ container = ContainerClient.from_connection_string(
 
 cache = {}
 
-cache_pkl = "cache.pkl"
+cache_pkl = "cache_parse.pkl"
 
 # While the function is running, the cache file must be temporarily saved in the temp dir
 cache_pkl_tmp_file_path = os.path.join(tempfile.gettempdir(), cache_pkl)
 
 # Load cache from Azure blob storage
 try:
-    logging.info("Loading cache from Azure blob storage")
+    logging.info(f"Loading cache {cache_pkl} from Azure blob storage")
     cache = pickle.loads(container.download_blob(blob=cache_pkl).readall())
 except (Exception,):
-    logging.error("Could not download blob, starting with empty cache")
+    logging.error(f"Could not download blob {cache_pkl}, starting with empty cache")
     logging.error(traceback.format_exc())
 
 
