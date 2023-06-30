@@ -6,6 +6,7 @@ import pickle
 import traceback
 from hashlib import sha256
 from typing import Any
+import uuid
 
 import requests
 from azure.functions import HttpResponse, HttpRequest
@@ -51,6 +52,8 @@ def main(req: HttpRequest) -> HttpResponse:
         files_with_no_cached_instrument = []
 
         for file in files:
+            if file.file_id is None:
+                file.file_id = uuid.uuid4().hex
             # Check if 'content' is present
             if not file.get("content"):
                 logging.error(f"File with id '{file.get('file_id')}' has no content")
