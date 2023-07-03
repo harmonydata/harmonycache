@@ -19,6 +19,6 @@ This endpoint is a wrapper for the endpoint `/text/match` in `Harmony API`. The 
 cached to Azure Blob Storage. If a vector for a question text is missing, the vector for this text will be requested
 from `Harmony API` using the endpoint `/text/vectors`.
 
-### **GET** `api/cache`
+### **GET** `/api/cache`
 
-This endpoint will return all cached items (instruments, vectors).
+This endpoint will return all cached items (instruments, vectors) stored in Azure Blob Storage.
