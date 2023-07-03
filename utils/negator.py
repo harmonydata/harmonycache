@@ -1,4 +1,4 @@
-"""This file was copied from Harmony API"""
+"""This file was copied from Harmony"""
 
 import spacy
 

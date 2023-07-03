@@ -24,7 +24,7 @@ cache_parse_pkl_tmp_file_path = os.path.join(tempfile.gettempdir(), cache_parse_
 
 def main(req: HttpRequest) -> HttpResponse:
     """
-    Endpoint: '/api/parse'
+    Endpoint: /api/parse
     """
 
     if req.method != "POST":
@@ -56,7 +56,7 @@ def main(req: HttpRequest) -> HttpResponse:
 
             hash_value = helpers.get_hash_value(file["content"])
             if hash_value in cache.keys():
-                # If instrument is cached, add it to results
+                # If instrument is cached
                 instrument = cache[hash_value]
                 response.append(instrument)
             else:
@@ -81,7 +81,7 @@ def main(req: HttpRequest) -> HttpResponse:
                         cache[hash_value] = instrument
                         response.append(instrument)
             else:
-                error_msg = "Could not get instruments from API"
+                error_msg = "Could not get instruments from Harmony API"
                 logging.error(error_msg)
                 return HttpResponse(body=error_msg, status_code=500)
 

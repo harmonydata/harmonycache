@@ -24,9 +24,9 @@ cache_match_pkl_tmp_file_path = os.path.join(tempfile.gettempdir(), cache_match_
 
 def main(req: HttpRequest) -> HttpResponse:
     """
-    Endpoint: '/api/match'
+    Endpoint: /api/match
 
-    Pieces of codes below were copied from Harmony API
+    Code snippets below were copied from Harmony API
     """
 
     if req.method != "POST":
@@ -39,7 +39,7 @@ def main(req: HttpRequest) -> HttpResponse:
         query = req_body_json.get("query")
 
         # Assign any missing IDs
-        for instrument in instruments:
+        for instrument in instruments or []:
             if instrument.get("file_id") is None:
                 instrument["file_id"] = uuid.uuid4().hex
             if instrument.get("instrument_id") is None:
@@ -50,7 +50,7 @@ def main(req: HttpRequest) -> HttpResponse:
         instrument_ids = []
         question_indices = []
         all_questions = []
-        for instrument in instruments:
+        for instrument in instruments or []:
             for question_idx, question in enumerate(instrument.get("questions")) or []:
                 instrument_id = instrument.get("instrument_id")
                 question_text = question.get("question_text")
@@ -63,22 +63,24 @@ def main(req: HttpRequest) -> HttpResponse:
                 question_indices.append(question_idx)
 
         all_texts = texts + negated_texts
+
+        # Include query in all_texts
         if query:
             all_texts.append(query)
-
-        all_vectors: list[list[float]] = []
 
         # A list of texts whose vectors aren't cached yet
         texts_with_no_cached_vector: list[str] = []
 
+        all_vectors: list[list[float]] = []
+
         for text in all_texts:
             hash_value = helpers.get_hash_value(text)
             if hash_value in cache.keys():
-                # If the vector of the text is cached, add it to all_vectors
+                # If vector of text is cached
                 vector = cache[hash_value]
                 all_vectors.append(vector)
             else:
-                # If the vector of the text is not cached
+                # If vector of text is not cached
                 texts_with_no_cached_vector.append(text)
 
         # Get vectors that aren't cached yet and cache them
@@ -92,7 +94,7 @@ def main(req: HttpRequest) -> HttpResponse:
                     cache[hash_value] = vector
                     all_vectors.append(vector)
             else:
-                error_msg = "Could not get vectors from API"
+                error_msg = "Could not get vectors from Harmony API"
                 logging.error(error_msg)
                 return HttpResponse(body=error_msg, status_code=500)
 
@@ -103,6 +105,7 @@ def main(req: HttpRequest) -> HttpResponse:
                 cache=cache,
             )
 
+        # Get similarity data
         all_questions, similarity_with_polarity, query_similarity = get_similarity_data(
             texts=texts,
             all_questions=all_questions,
@@ -139,7 +142,7 @@ def cosine_similarity(vec1: np.ndarray, vec2: np.ndarray) -> np.ndarray:
     """
     Cosine similarity
 
-    This function was copied from Harmony API
+    This function was copied from Harmony
     """
 
     dp = np.dot(vec1, vec2.T)
@@ -155,7 +158,7 @@ def get_similarity_data(
     """
     Get similarity data
 
-    Pieces of codes below were copied from Harmony API
+    Code snippets below were copied from Harmony
     """
 
     all_vectors = np.array(all_vectors)
