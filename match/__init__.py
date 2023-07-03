@@ -9,28 +9,31 @@ import numpy as np
 import requests
 from azure.functions import HttpResponse, HttpRequest
 
-from utils import helpers
-from utils.negator import negate
+from .. import constants
+from ..utils import helpers
+from ..utils.negator import negate
 
-harmony_api = os.getenv("HARMONY_API")
-
-cache_match_pkl = "cache_match.pkl"
-
-cache = helpers.get_cache_from_azure(cache_file_name=cache_match_pkl)
+cache = helpers.get_cache_from_azure(cache_file_name=constants.cache_vectors_pkl)
 
 # While the function is running, the cache file must be temporarily saved in the temp dir
-cache_match_pkl_tmp_file_path = os.path.join(tempfile.gettempdir(), cache_match_pkl)
+cache_vectors_pkl_tmp_file_path = os.path.join(
+    tempfile.gettempdir(), constants.cache_vectors_pkl
+)
 
 
 def main(req: HttpRequest) -> HttpResponse:
     """
-    Endpoint: /api/match
+    Endpoint: POST /api/match
 
     Code snippets below were copied from Harmony API
     """
 
     if req.method != "POST":
-        return HttpResponse(body="Method not allowed", status_code=405)
+        return HttpResponse(
+            body="Method not allowed",
+            headers={"Content-Type": "application/json"},
+            status_code=405,
+        )
 
     req_body = req.get_body()
     if req_body:
@@ -96,12 +99,16 @@ def main(req: HttpRequest) -> HttpResponse:
             else:
                 error_msg = "Could not get vectors from Harmony API"
                 logging.error(error_msg)
-                return HttpResponse(body=error_msg, status_code=500)
+                return HttpResponse(
+                    body=error_msg,
+                    headers={"Content-Type": "application/json"},
+                    status_code=500,
+                )
 
             # Save cache to storage
             helpers.save_cache_to_blob_storage(
-                cache_tmp_file_path=cache_match_pkl_tmp_file_path,
-                cache_file_name=cache_match_pkl,
+                cache_tmp_file_path=cache_vectors_pkl_tmp_file_path,
+                cache_file_name=constants.cache_vectors_pkl,
                 cache=cache,
             )
 
@@ -124,15 +131,15 @@ def main(req: HttpRequest) -> HttpResponse:
             headers={"Content-Type": "application/json"},
             status_code=200,
         )
-
-    return HttpResponse(body="Invalid request", status_code=400)
+    else:
+        return HttpResponse(body="Invalid request", status_code=400)
 
 
 def get_response_vectors(texts: list[str]) -> requests.Response:
     """Get response vectors"""
 
     return requests.post(
-        url=f"{harmony_api}/text/vectors",
+        url=f"{constants.harmony_api}/text/vectors",
         data=json.dumps(texts),
         headers={"Content-Type": "application/json"},
     )

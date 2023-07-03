@@ -2,33 +2,36 @@ import json
 import logging
 import os
 import tempfile
-from typing import Any
 import uuid
+from typing import Any
 
 import requests
 from azure.functions import HttpResponse, HttpRequest
 
+from .. import constants
 from ..utils import helpers
-
-harmony_api = os.getenv("HARMONY_API")
 
 container = helpers.get_container_harmonycache()
 
-cache_parse_pkl = "cache_parse.pkl"
-
-cache = helpers.get_cache_from_azure(cache_file_name=cache_parse_pkl)
+cache = helpers.get_cache_from_azure(cache_file_name=constants.cache_instruments_pkl)
 
 # While the function is running, the cache file must be temporarily saved in the temp dir
-cache_parse_pkl_tmp_file_path = os.path.join(tempfile.gettempdir(), cache_parse_pkl)
+cache_instruments_pkl_tmp_file_path = os.path.join(
+    tempfile.gettempdir(), constants.cache_instruments_pkl
+)
 
 
 def main(req: HttpRequest) -> HttpResponse:
     """
-    Endpoint: /api/parse
+    Endpoint: POST /api/parse
     """
 
     if req.method != "POST":
-        return HttpResponse("Method not allowed", status_code=405)
+        return HttpResponse(
+            "Method not allowed",
+            headers={"Content-Type": "application/json"},
+            status_code=405,
+        )
 
     req_body = req.get_body()
     if req_body:
@@ -39,7 +42,11 @@ def main(req: HttpRequest) -> HttpResponse:
 
         # Check if 'files' is a list
         if not isinstance(files, list):
-            return HttpResponse(body="Invalid request", status_code=400)
+            return HttpResponse(
+                body="Invalid request",
+                headers={"Content-Type": "application/json"},
+                status_code=400,
+            )
 
         # A list of files whose instruments are not cached
         files_with_no_cached_instrument = []
@@ -87,8 +94,8 @@ def main(req: HttpRequest) -> HttpResponse:
 
             # Save cache to storage
             helpers.save_cache_to_blob_storage(
-                cache_tmp_file_path=cache_parse_pkl_tmp_file_path,
-                cache_file_name=cache_parse_pkl,
+                cache_tmp_file_path=cache_instruments_pkl_tmp_file_path,
+                cache_file_name=constants.cache_instruments_pkl,
                 cache=cache,
             )
 
@@ -98,15 +105,19 @@ def main(req: HttpRequest) -> HttpResponse:
             headers={"Content-Type": "application/json"},
             status_code=200,
         )
-
-    return HttpResponse(body="Invalid request", status_code=400)
+    else:
+        return HttpResponse(
+            body="Invalid request",
+            headers={"Content-Type": "application/json"},
+            status_code=400,
+        )
 
 
 def get_response_parse(not_cached_files: list) -> requests.Response:
     """Get response parse"""
 
     return requests.post(
-        url=f"{harmony_api}/text/parse",
+        url=f"{constants.harmony_api}/text/parse",
         data=json.dumps(not_cached_files),
         headers={"Content-Type": "application/json"},
     )

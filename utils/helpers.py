@@ -1,22 +1,23 @@
+import json
 import logging
 import os
 import pickle
+import tempfile
 import traceback
 from hashlib import sha256
-import json
-import tempfile
 
 import numpy as np
 from azure.storage.blob import ContainerClient
 
-from models.question import Question
+from .. import constants
+from ..models.question import Question
 
 
 def get_container_harmonycache() -> ContainerClient:
     """Get container 'harmonycache'"""
 
     return ContainerClient.from_connection_string(
-        conn_str=os.getenv("AZURE_STORAGE_CONNECTION_STRING"),
+        conn_str=constants.AZURE_STORAGE_CONNECTION_STRING,
         container_name="harmonycache",
     )
 
@@ -25,26 +26,24 @@ def get_container_mhc() -> ContainerClient:
     """Get container 'mhc'"""
 
     return ContainerClient.from_connection_string(
-        conn_str=os.getenv("AZURE_STORAGE_CONNECTION_STRING"),
+        conn_str=constants.AZURE_STORAGE_CONNECTION_STRING,
         container_name="mhc",
     )
 
 
-def get_cache_from_azure(cache_file_name: str):
+def get_cache_from_azure(cache_file_name: str) -> dict:
     """Get cache from Azure Blob Storage"""
 
     container_harmonycache = get_container_harmonycache()
     cache = {}
 
     try:
-        logging.info(f"Loading cache {cache_file_name} from Azure blob storage")
+        logging.info(f"Loading blob {cache_file_name} from Azure blob storage")
         cache = pickle.loads(
             container_harmonycache.download_blob(blob=cache_file_name).readall()
         )
     except (Exception,):
-        logging.error(
-            f"Could not download blob {cache_file_name}, starting with empty cache"
-        )
+        logging.error(f"Could not download blob {cache_file_name}")
         logging.error(traceback.format_exc())
 
     return cache
@@ -71,7 +70,7 @@ def save_cache_to_blob_storage(
     container_harmonycache.upload_blob(name=cache_file_name, data=data, overwrite=True)
 
 
-def get_hash_value(text: str):
+def get_hash_value(text: str) -> str:
     """Get hash value"""
 
     return sha256(text.encode()).hexdigest()
