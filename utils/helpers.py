@@ -1,3 +1,4 @@
+import gzip
 import json
 import logging
 import os
@@ -5,6 +6,7 @@ import pickle
 import tempfile
 import traceback
 from hashlib import sha256
+from typing import Union
 
 import numpy as np
 from azure.storage.blob import ContainerClient
@@ -110,3 +112,12 @@ def get_mhc_embeddings() -> tuple:
         logging.error(f"Could not load MHC embeddings: {e}")
 
     return mhc_questions, mhc_all_metadata, mhc_embeddings
+
+
+def gzip_compress_data(data: Union[dict, list, str, int, float]) -> bytes:
+    """gzip Compress data"""
+
+    json_data = json.dumps(data, indent=2).encode("utf-8")
+    compressed = gzip.compress(json_data)
+
+    return compressed
