@@ -106,7 +106,7 @@ def main(req: HttpRequest) -> HttpResponse:
         return HttpResponse(
             body=response_compressed,
             headers={
-                "Content-Disposition": "attachment; filename=instruments.json.gzip"
+                "Content-Disposition": "attachment; filename=text_parse_response.json.gzip"
             },
             status_code=200,
         )

@@ -126,9 +126,15 @@ def main(req: HttpRequest) -> HttpResponse:
             "query_similarity": query_similarity,
         }
 
+        # Compress response data
+        response_compressed = helpers.gzip_compress_data(data=response)
+
+        # Return results
         return HttpResponse(
-            body=json.dumps(response),
-            headers={"Content-Type": "application/json"},
+            body=response_compressed,
+            headers={
+                "Content-Disposition": "attachment; filename=text_match_response.json.gzip"
+            },
             status_code=200,
         )
     else:
