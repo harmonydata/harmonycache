@@ -27,7 +27,9 @@ def main(req: HttpRequest) -> HttpResponse:
     # Get cached items
     response = {
         "instruments": [v for k, v in cache_instruments.items()],
-        "vectors": [v for k, v in cache_vectors.items()],
+        "vectors": [
+            {"text": v["text"], "vector": v["vector"]} for k, v in cache_vectors.items()
+        ],
     }
 
     return HttpResponse(

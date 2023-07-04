@@ -121,3 +121,12 @@ def gzip_compress_data(data: Union[dict, list, str, int, float]) -> bytes:
     compressed = gzip.compress(json_data)
 
     return compressed
+
+
+def clear_all_cache():
+    """Clear cache"""
+
+    container = get_container_harmonycache()
+
+    container.delete_blob(blob=constants.cache_instruments_pkl)
+    container.delete_blob(blob=constants.cache_vectors_pkl)

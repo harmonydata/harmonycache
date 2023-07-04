@@ -74,7 +74,7 @@ def main(req: HttpRequest) -> HttpResponse:
         # A list of texts whose vectors aren't cached yet
         texts_with_no_cached_vector: list[str] = []
 
-        all_vectors: list[list[float]] = []
+        all_vectors: list[dict[str, list[float]]] = []
 
         for text in all_texts:
             hash_value = helpers.get_hash_value(text)
@@ -94,8 +94,8 @@ def main(req: HttpRequest) -> HttpResponse:
                 text_vectors = zip(texts_with_no_cached_vector, vectors)
                 for text, vector in text_vectors:
                     hash_value = helpers.get_hash_value(text)
-                    cache[hash_value] = vector
-                    all_vectors.append(vector)
+                    cache[hash_value] = {"text": text, "vector": vector}
+                    all_vectors.append({"text": text, "vector": vector})
             else:
                 error_msg = "Could not get vectors from Harmony API"
                 logging.error(error_msg)
@@ -117,7 +117,7 @@ def main(req: HttpRequest) -> HttpResponse:
             texts=texts,
             all_questions=all_questions,
             query=query,
-            all_vectors=all_vectors,
+            all_vectors=[v["vector"] for v in all_vectors],
         )
 
         response = {
