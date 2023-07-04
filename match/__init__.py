@@ -204,7 +204,6 @@ def get_similarity_data(
     similarity_with_polarity = similarity_max * similarity_polarity
 
     # Get MHC embeddings
-    # FIXME: This function below makes the response slow due to the 3 files being downloaded
     mhc_questions, mhc_all_metadata, mhc_embeddings = helpers.get_mhc_embeddings()
 
     # Work out similarity with MHC
