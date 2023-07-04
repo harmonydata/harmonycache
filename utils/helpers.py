@@ -140,7 +140,7 @@ def get_example_questionnaires() -> List:
             instrument = Instrument.parse_raw(line)
             example_instruments.append(instrument.dict())
     except (Exception,) as e:
-        logging.error(f"Could not load MHC embeddings: {e}")
+        logging.error(f"Could not load example questionnaires: {e}")
 
     return example_instruments
 
