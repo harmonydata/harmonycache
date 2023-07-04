@@ -1,4 +1,3 @@
-import json
 import os
 
 from azure.functions import HttpResponse, HttpRequest
@@ -32,8 +31,12 @@ def main(req: HttpRequest) -> HttpResponse:
         ],
     }
 
+    response_compressed = helpers.gzip_compress_data(data=response)
+
     return HttpResponse(
-        body=json.dumps(response),
-        headers={"Content-Type": "application/json"},
+        body=response_compressed,
+        headers={
+            "Content-Disposition": "attachment; filename=cache_response.json.gzip"
+        },
         status_code=200,
     )
