@@ -17,19 +17,13 @@ cache_vectors = helpers.get_cache_from_azure(
 
 def main(req: HttpRequest) -> HttpResponse:
     """
-    Endpoint: GET /api/cache
+    Endpoint: GET /api/examples
     """
 
     if req.method != "GET":
         return HttpResponse("Method not allowed", status_code=405)
 
-    # Get cached items
-    response = {
-        "instruments": [v for k, v in cache_instruments.items()],
-        "vectors": [
-            {"text": v["text"], "vector": v["vector"]} for k, v in cache_vectors.items()
-        ],
-    }
+    response = helpers.get_example_questionnaires()
 
     # Compress response data
     response_compressed = helpers.gzip_compress_data(data=response)
@@ -37,7 +31,7 @@ def main(req: HttpRequest) -> HttpResponse:
     return HttpResponse(
         body=response_compressed,
         headers={
-            "Content-Disposition": "attachment; filename=cache_response.json.gzip"
+            "Content-Disposition": "attachment; filename=examples_response.json.gzip"
         },
         status_code=200,
     )

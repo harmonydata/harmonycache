@@ -6,12 +6,13 @@ import pickle
 import tempfile
 import traceback
 from hashlib import sha256
-from typing import Union
+from typing import Union, List
 
 import numpy as np
 from azure.storage.blob import ContainerClient
 
 from .. import constants
+from ..models.instrument import Instrument
 from ..models.question import Question
 
 
@@ -30,6 +31,15 @@ def get_container_mhc() -> ContainerClient:
     return ContainerClient.from_connection_string(
         conn_str=constants.AZURE_STORAGE_CONNECTION_STRING,
         container_name="mhc",
+    )
+
+
+def get_container_web() -> ContainerClient:
+    """Get container '$web'"""
+
+    return ContainerClient.from_connection_string(
+        conn_str=constants.AZURE_STORAGE_CONNECTION_STRING,
+        container_name="$web",
     )
 
 
@@ -112,6 +122,27 @@ def get_mhc_embeddings() -> tuple:
         logging.error(f"Could not load MHC embeddings: {e}")
 
     return mhc_questions, mhc_all_metadata, mhc_embeddings
+
+
+def get_example_questionnaires() -> List:
+    """Get example questionnaires"""
+
+    example_instruments = []
+
+    container_web = get_container_web()
+
+    example_questionnaires_json = container_web.download_blob(
+        "example_questionnaires.json"
+    ).readall()
+
+    try:
+        for line in example_questionnaires_json.splitlines():
+            instrument = Instrument.parse_raw(line)
+            example_instruments.append(instrument.dict())
+    except (Exception,) as e:
+        logging.error(f"Could not load MHC embeddings: {e}")
+
+    return example_instruments
 
 
 def gzip_compress_data(data: Union[dict, list, str, int, float]) -> bytes:
