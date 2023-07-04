@@ -1,11 +1,7 @@
-import os
-
 from azure.functions import HttpResponse, HttpRequest
 
 from .. import constants
 from ..utils import helpers
-
-harmony_api = os.getenv("HARMONY_API")
 
 cache_instruments = helpers.get_cache_from_azure(
     cache_file_name=constants.cache_instruments_pkl
