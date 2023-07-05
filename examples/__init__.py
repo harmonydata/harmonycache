@@ -27,7 +27,9 @@ def main(req: HttpRequest) -> HttpResponse:
     return HttpResponse(
         body=response_compressed,
         headers={
-            "Content-Disposition": "attachment; filename=examples_response.json.gzip"
+            "Content-Type": "application/json",
+            "Accept-Encoding": "gzip",
+            "Content-Encoding": "gzip",
         },
         status_code=200,
     )
