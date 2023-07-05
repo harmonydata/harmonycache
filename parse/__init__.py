@@ -99,13 +99,10 @@ def main(req: HttpRequest) -> HttpResponse:
                 cache=cache,
             )
 
-        # Compress response data
-        response_compressed = helpers.gzip_compress_data(data=response)
-
         return HttpResponse(
-            body=response_compressed,
+            body=json.dumps(response),
             headers={
-                "Content-Disposition": "attachment; filename=parse_response.json.gzip"
+                "Content-Type": "application/json",
             },
             status_code=200,
         )
