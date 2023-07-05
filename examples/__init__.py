@@ -27,8 +27,6 @@ def main(req: HttpRequest) -> HttpResponse:
         body=json.dumps(response),
         headers={
             "Content-Type": "application/json",
-            "Accept-Encoding": "gzip",
-            "Content-Encoding": "gzip",
         },
         status_code=200,
     )
