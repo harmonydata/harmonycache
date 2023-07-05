@@ -1,3 +1,5 @@
+import json
+
 from azure.functions import HttpResponse, HttpRequest
 
 from .. import constants
@@ -21,11 +23,8 @@ def main(req: HttpRequest) -> HttpResponse:
 
     response = helpers.get_example_questionnaires()
 
-    # Compress response data
-    response_compressed = helpers.gzip_compress_data(data=response)
-
     return HttpResponse(
-        body=response_compressed,
+        body=json.dumps(response),
         headers={
             "Content-Type": "application/json",
             "Accept-Encoding": "gzip",
